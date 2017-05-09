@@ -1,0 +1,22 @@
+<html>
+<head>
+    <title>Welcome to Socket.io Game</title>
+</head>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+<script>
+    $(function () {
+        let socket = io.connect();
+
+        socket.on("msg", function(msg){
+            let serverMsg = msg.id;
+            socket.emit("client", `client joined with id : ${serverMsg}`);
+            $('#m').val(serverMsg);
+        });
+    });
+</script>
+<body>
+<h1>Welcome to Socket.io Game</h1>
+<input id="m" autocomplete="off" />
+</body>
+</html>
