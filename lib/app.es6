@@ -10,7 +10,6 @@ let {NODE_ENV} = process.env,
   app = express(),
   server = http.createServer(app),
   io = socketio.listen(server),
-// urlPrefix = config.urlPrefix,
   environmentVariables = require("../config/environmentVariables");
 
 io.on("connection", socket => {
