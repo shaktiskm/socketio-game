@@ -10,6 +10,7 @@ let {NODE_ENV} = process.env,
   app = express(),
   server = http.createServer(app),
   io = socketio.listen(server),
+  urlPrefix = config.urlPrefix,
   environmentVariables = require("../config/environmentVariables");
 
 io.on("connection", socket => {
@@ -34,6 +35,10 @@ if (config.environmentVariableChecker.isEnabled) {
 // Sets the relevant config app-wise
 app.set("port", config.http.port);
 
+app.get(`${urlPrefix}/healthcheck`, (req, res) => {
+  res.send({"msg": "OK"});
+});
+
 app.get("/", (req, res) => {
   res.sendFile("index.html", {"root": "."});
 });
@@ -44,3 +49,5 @@ app.use(mwErrorHandler);
 server.listen(app.get("port"), () => {
   console.log(`Server has started at ${new Date()} and is listening on port: ${app.get("port")}`);
 });
+
+module.exports = server;
