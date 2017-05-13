@@ -5,18 +5,153 @@
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 <script>
-    $(function () {
-        let socket = io.connect();
+
+    let socket;
+
+    $(document).ready(function(){
+
+        socket = io.connect(),
+          socketId = $("#hdnSocketId");
 
         socket.on("msg", function(msg){
             let serverMsg = msg.id;
-            socket.emit("client", `client joined with id : ${serverMsg}`);
-            $('#m').val(serverMsg);
+            socket.emit("client", {"id": serverMsg, "name": "shakti" + serverMsg});
+            // alert(serverMsg);
+            socketId.val(serverMsg);
+            // alert(socketId.val());
+        });
+
+        socket.on("games available", function(msg) {
+            console.log("games all.....", msg);
+            $(msg).each(function(index, elem){
+               // alert(elem.id);
+                $(".ol").append("<li>"+elem.name+" <button id="+elem.id+" onClick='join(this.id)'>Join</button><span class="+elem.id+"><span></li>");
+                console.log("game creator----", elem.players);
+                elem.players.forEach(function (player) {
+                    if(elem.creator === socketId.val()) {
+                        $("."+elem.id).append("<div for="+player.id+">"+player.name+"<button id="+player.id+" onClick='play(this.id)'>Play Game</button><button onClick='exit(this)'>Exit</button></div>");
+
+                    } else if (player.id !== socketId.val()) {
+                        $("."+elem.id).append("<div for="+player.id+">"+player.name+"</div>");
+                    }
+                    else {
+                        $("."+elem.id).append("<div for="+player.id+">"+player.name+"<button id="+player.id+" onClick='leave(this.id)'>Leave</button><button onClick='disable(this)'>Ready</button></div>");
+
+                    }
+                });
+            });
+            // alert(msg);
+        });
+
+        socket.on("new game added", function(msg) {
+            console.log("new games added.....", msg);
+            $(msg).each(function(index, elem){
+                // alert(elem.id);
+                $(".ol").append("<li>"+elem.name+" <button id="+elem.id+" onClick='join(this.id)'>Join</button><span class="+elem.id+"><span></li>");
+            });
+            // alert(msg);
+        });
+
+        socket.on("player joined", function(msg) {
+            let id = msg.gameId,
+                player = msg.player,
+                    creatorId = msg.creatorId;
+
+            console.log("player joined...", msg);
+
+            if (player.id !== socketId.val() && creatorId === socketId.val()) {
+                $("."+id).append("<div for="+player.id+">"+player.name+"<button id="+player.id+" onClick='leave(this.id)'>Remove</button></div>");
+            } else if (player.id !== socketId.val()) {
+                $("."+id).append("<div for="+player.id+">"+player.name+"</div>");
+            }
+            else {
+                $("."+id).append("<div for="+player.id+">"+player.name+"<button id="+player.id+" onClick='leave(this.id)'>Leave</button><button onClick='disable(this)'>Ready</button></div>");
+
+            }
+        });
+
+        $("#reg").click(function(){
+            var name =  $("#name").val();
+            alert(name);
+            let msg = {
+                "name": name,
+                "id": socketId.val()
+            };
+
+            alert(socketId.val());
+
+            socket.emit("register", msg);
+            $(".register").hide();
+            $(".game").show();
+        });
+
+        $("#crgame").click(function(){
+            $(".gameinfo").show();
+
+        });
+        $("#create").click(function(){
+            var game = $("#gname").val();
+            var msg = {
+                "name": game,
+                "creatorId": socketId.val()
+            };
+
+            socket.emit("createGame", msg);
+            $(".gameinfo").hide();
         });
     });
+
+
+    var count =0;
+    function join(id)
+    {
+        let msg = {
+            "playerId": socketId.val(),
+            "gameId": id
+        };
+
+        console.log("socket--", socket);
+
+        socket.emit("joinGame", msg);
+        alert("join" + msg.gameId);
+        count = count+1;
+    }
+
+    function disable(e)
+    {
+        $(e).prop('disabled', true);
+    }
+
+    function leave(id)
+    {
+        $("div[for="+id+"]").remove();
+    }
+
+    function play(e)
+    {
+        alert("play");
+    }
+
+    function exit(e)
+    {
+        alert("exit");
+    }
+
 </script>
+</head>
 <body>
 <h1>Welcome to Socket.io Game</h1>
-<input id="m" autocomplete="off" />
+<input id="hdnSocketId" type="hidden" value="xyz">
+<div class="register">
+    <input id="name" type="text" autocomplete="off" /><button id="reg">Register</button>
+</div>
+<div class="game" style="display:none">
+    <button id="crgame">Create Game</button>
+    <div class="gameinfo" style="display:none">
+        <input id="gname" type="text" autocomplete="off" /><button id="create">Create</button>
+    </div>
+    <ol class="ol">
+    </ol>
+</div>
 </body>
 </html>
