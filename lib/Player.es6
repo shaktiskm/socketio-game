@@ -1,9 +1,9 @@
 class Player {
 
-	constructor(id, name) {
+	constructor(id, name, isReady = false) {
 		this.id = id;
 		this.name = name;
-		this.isReady = false;
+		this.isReady = isReady;
 	}
 
 }

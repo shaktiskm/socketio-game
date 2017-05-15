@@ -121,7 +121,7 @@
             console.log("game in progress.....", msg);
             let gameId = msg.gameId;
 
-            $('#'+gameId).after('<span>Game Started</span>');
+            $('#'+gameId).after('<span>Game Started<button onClick="gameOver(\'' + gameId + '\')">Game Over</button></span>');
 
             $('.'+gameId).find('button').prop('disabled',true);
         });
@@ -226,6 +226,16 @@
         socket.emit("playGame", msg);
     }
 
+    function gameOver(gameId) {
+        alert("Game Over");
+
+        let msg = {
+            "gameId": gameId
+        };
+
+        socket.emit('exitGame', msg);
+    }
+
     function exit(e) {
         alert("exit");
         var player = e.id;
@@ -239,7 +249,6 @@
     }
 
 </script>
-</head>
 <body>
 <h1>Welcome to Socket.io Game</h1>
 <input id="hdnSocketId" type="hidden" value="xyz">
