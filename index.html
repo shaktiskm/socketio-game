@@ -28,7 +28,7 @@
             $('.' + elem.id).empty();
 
             elem.players.forEach(function (player) {
-                if(elem.creator === socketId.val()) {
+                if(elem.creator === socketId.val() && player.id === socketId.val()) {
                     $('#'+elem.id).prop('disabled', true);
                     $("."+elem.id).append("<div for="+player.id+">"+player.name+"<button id="+player.id+" onClick='play(this)' disabled>Play Game</button><button id="+'red-'+player.id+" onClick='disable(this)'>Ready</button><button onClick='exit(this)'>Exit</button></div>");
 
@@ -52,7 +52,7 @@
                 $(".ol").append("<li>"+elem.name+" <button id="+elem.id+" onClick='join(this.id)'>Join</button><span class="+elem.id+"></span></li>");
                 console.log("game creator----", elem.players);
                 elem.players.forEach(function (player) {
-                    if(elem.creator === socketId.val()) {
+                    if(elem.creator === socketId.val() && player.id === socketId.val()) {
                         $('#'+elem.id).prop('disabled', true);
                         $("."+elem.id).append("<div for="+player.id+">"+player.name+"<button id="+player.id+" onClick='play(this)' disabled>Play Game</button><button id="+'red-'+player.id+" onClick='disable(this)'>Ready</button><button onClick='exit(this)'>Exit</button></div>");
 

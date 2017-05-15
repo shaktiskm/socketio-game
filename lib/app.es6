@@ -60,10 +60,10 @@ function register(msg) {
   let gameManager = getGameManagerIns(),
     availableGames;
 
-  availableGames = gameManager.getAllGame();
+  availableGames = gameManager.getAllGame().filter(game => !game.inProgress);
   console.log("playerMap ..", playerMap);
   console.log("available games in register ..", availableGames);
-  socket.emit("games available", availableGames);
+  io.to(id).emit("games available", availableGames);
 }
 
 function createGame(msg) {
