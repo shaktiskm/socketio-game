@@ -39,6 +39,8 @@ io.on("connection", sock => {
 
   socket.on("createGame", createGame);
 
+  socket.on("exitGame", exitGame);
+
   socket.on("disconnect", () => {
     console.log("User Disconnected ... ");
   });
@@ -83,8 +85,40 @@ function createGame(msg) {
 
 function leave(msg) {
   console.log("server leaveGame---> ", msg);
+
+  let {gameId, playerId} = msg,
+    gameManager = getGameManagerIns(),
+    availableGames;
+
+  availableGames = gameManager.getAllGame();
+
+  availableGames.forEach(game => {
+    if (game.id === gameId) {
+      game.players = game.players.filter(p => p.id !== playerId);
+      socket.emit("players available", game);
+      socket.broadcast.emit("players available", game);
+    }
+  });
 }
 
+function exitGame(msg) {
+  console.log("server exitGame---> ", msg);
+
+  let {gameId} = msg,
+    gameManager = getGameManagerIns(),
+    availableGames;
+
+  availableGames = gameManager.getAllGame();
+
+  let games = availableGames.filter(game => game.id !== gameId);
+
+  gameManager.setAllGame(games);
+
+  console.log("game after exit", games);
+
+  socket.emit("games after exit", games);
+  socket.broadcast.emit("games after exit", games);
+}
 
 function join(msg) {
   console.log("server join---> ", msg);

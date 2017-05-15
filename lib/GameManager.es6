@@ -14,6 +14,10 @@ class GameManager {
 		return this.games;
 	}
 
+	setAllGame(games) {
+		this.games = games;
+	}
+
 }
 
 function getGameManagerIns() {
