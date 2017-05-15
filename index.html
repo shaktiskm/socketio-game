@@ -46,6 +46,7 @@
 
         socket.on("games available", function(msg) {
             console.log("games all.....", msg);
+            alert("games all");
             $(msg).each(function(index, elem){
                 // alert(elem.id);
                 $(".ol").append("<li>"+elem.name+" <button id="+elem.id+" onClick='join(this.id)'>Join</button><span class="+elem.id+"></span></li>");
@@ -130,11 +131,12 @@
         socket.on("player ready", function(msg) {
             console.log("player ready.....", msg);
             let creatorId = msg.creatorId,
-                    playerId = msg.playerId;
+                gameId = msg.gameId,
+                playerId = msg.playerId;
 
             alert("reday");
 
-            $('#'+creatorId).prop('disabled', false);
+            $('.' + gameId).find(id = '#'+creatorId).prop('disabled', false);
             $('#red-'+playerId).prop('disabled', true);
         });
 

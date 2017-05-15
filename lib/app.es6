@@ -72,12 +72,16 @@ function createGame(msg) {
     newGame = new Game(name, creatorId),
     gameManager = getGameManagerIns(),
     availableGames,
-    uniqueIdServ;
+    uniqueIdServ,
+    player;
 
   uniqueIdServ = new UniqueIdService(uuid);
   newGame.id = uniqueIdServ.createUniqueId();
-  console.log("new play--------", playerMap.get(creatorId));
-  newGame.players.push(playerMap.get(creatorId));
+  player = playerMap.get(creatorId);
+  console.log("new play--------", player);
+  let clonnedPlayer = Object.assign(player);
+  clonnedPlayer.isReady = false;
+  newGame.players.push(clonnedPlayer);
 
   gameManager.addGame(newGame);
   availableGames = gameManager.getAllGame();
@@ -129,10 +133,15 @@ function join(msg) {
   let {playerId, gameId} = msg,
     gameManager = getGameManagerIns(),
     availableGames = gameManager.getAllGame(),
-    player = playerMap.get(playerId),
-    game = availableGames.filter(game => game.id === gameId);
+    player,
+    clonnedPlayer,
+    game;
 
-  game[0].join(player);
+  player = playerMap.get(playerId),
+  game = availableGames.filter(game => game.id === gameId);
+  clonnedPlayer = Object.assign(player);
+  clonnedPlayer.isReady = false;
+  game[0].join(clonnedPlayer);
 
   console.log("game------", game);
 
@@ -194,6 +203,7 @@ function playerReady(msg) {
 
   let message = {
     "creatorId": game[0].creator,
+    "gameId": gameId,
     "playerId": playerId
   };
 
