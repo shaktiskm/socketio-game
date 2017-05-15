@@ -4,6 +4,7 @@ class Game {
 		this.name = name;
 		this.creator = creator;
 		this.players = [];
+		this.inProgress = false;
 	}
 
 	join(player) {

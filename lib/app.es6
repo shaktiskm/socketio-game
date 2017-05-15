@@ -38,6 +38,8 @@ io.on("connection", sock => {
   socket.on("joinGame", join);
 
   socket.on("createGame", createGame);
+  
+  socket.on("playGame", playGame);
 
   socket.on("exitGame", exitGame);
 
@@ -142,6 +144,26 @@ function join(msg) {
 
   socket.emit("player joined", message);
   socket.broadcast.emit("player joined", message);
+}
+
+function playGame(msg) {
+  let {gameId} = msg,
+    gameManager = getGameManagerIns(),
+    availableGames = gameManager.getAllGame();
+
+  availableGames = availableGames.map(game => {
+    if (game.id === gameId) {
+      game.inProgress = true;
+    }
+    return game;
+  });
+
+  let message = {
+    "gameId": gameId
+  };
+
+  socket.emit("game in progress", message);
+  socket.broadcast.emit("game in progress", message);
 }
 
 // Checks the required environment variables

@@ -117,6 +117,15 @@
             }
         });
 
+        socket.on("game in progress", function(msg) {
+            console.log("game in progress.....", msg);
+            let gameId = msg.gameId;
+
+            $('#'+gameId).after('<span>Game Started</span>');
+
+            $('.'+gameId).find('button').prop('disabled',true);
+        });
+
         $("#reg").click(function(){
             var name =  $("#name").val();
             alert(name);
@@ -191,6 +200,16 @@
 
     function play(e) {
         alert("play");
+        var gameId = $(e).parent().parent().attr('class');
+        let msg = {
+            "gameId": gameId
+        };
+
+        socket.emit("playGame", msg);
+    }
+
+    function playGame(e) {
+        alert("playGame");
         var gameId = $(e).parent().parent().attr('class');
         $('#'+gameId).after('<span>Game Started</span>');
 

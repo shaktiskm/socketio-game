@@ -10,6 +10,10 @@ class GameManager {
 		this.games.push(game);
 	}
 
+	getGameById(gameId) {
+		return this.games.filter(id => id === gameId);
+	}
+
 	getAllGame() {
 		return this.games;
 	}
