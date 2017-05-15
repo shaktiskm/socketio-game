@@ -30,13 +30,13 @@
             elem.players.forEach(function (player) {
                 if(elem.creator === socketId.val()) {
                     $('#'+elem.id).prop('disabled', true);
-                    $("."+elem.id).append("<div for="+player.id+">"+player.name+"<button id="+player.id+" onClick='play(this)'>Play Game</button><button onClick='exit(this)'>Exit</button></div>");
+                    $("."+elem.id).append("<div for="+player.id+">"+player.name+"<button id="+player.id+" onClick='play(this)' disabled>Play Game</button><button id="+'red-'+player.id+" onClick='disable(this)'>Ready</button><button onClick='exit(this)'>Exit</button></div>");
 
                 } else if (player.id !== socketId.val()) {
                     $("."+elem.id).append("<div for="+player.id+">"+player.name+"</div>");
                 }
                 else {
-                    $("."+elem.id).append("<div for="+player.id+">"+player.name+"<button id="+player.id+" onClick='leave(this)'>Leave</button><button onClick='disable(this)'>Ready</button></div>");
+                    $("."+elem.id).append("<div for="+player.id+">"+player.name+"<button id="+player.id+" onClick='leave(this)'>Leave</button><button id="+'red-'+player.id+" onClick='disable(this)'>Ready</button></div>");
 
                 }
                 });
@@ -53,13 +53,13 @@
                 elem.players.forEach(function (player) {
                     if(elem.creator === socketId.val()) {
                         $('#'+elem.id).prop('disabled', true);
-                        $("."+elem.id).append("<div for="+player.id+">"+player.name+"<button id="+player.id+" onClick='play(this)'>Play Game</button><button onClick='exit(this)'>Exit</button></div>");
+                        $("."+elem.id).append("<div for="+player.id+">"+player.name+"<button id="+player.id+" onClick='play(this)' disabled>Play Game</button><button id="+'red-'+player.id+" onClick='disable(this)'>Ready</button><button onClick='exit(this)'>Exit</button></div>");
 
                     } else if (player.id !== socketId.val()) {
                         $("."+elem.id).append("<div for="+player.id+">"+player.name+"</div>");
                     }
                     else {
-                        $("."+elem.id).append("<div for="+player.id+">"+player.name+"<button id="+player.id+" onClick='leave(this)'>Leave</button><button onClick='disable(this)'>Ready</button></div>");
+                        $("."+elem.id).append("<div for="+player.id+">"+player.name+"<button id="+player.id+" onClick='leave(this)'>Leave</button><button id="+'red-'+player.id+" onClick='disable(this)'>Ready</button></div>");
 
                     }
                 });
@@ -76,13 +76,13 @@
                 elem.players.forEach(function (player) {
                     if(elem.creator === socketId.val() && player.id === socketId.val()) {
                         $('#'+elem.id).prop('disabled', true);
-                        $("."+elem.id).append("<div for="+player.id+">"+player.name+"<button id="+player.id+" onClick='play(this)'>Play Game</button><button onClick='exit(this)'>Exit</button></div>");
+                        $("."+elem.id).append("<div for="+player.id+">"+player.name+"<button id="+player.id+" onClick='play(this)' disabled>Play Game</button><button id="+'red-'+player.id+" onClick='disable(this)'>Ready</button><button onClick='exit(this)'>Exit</button></div>");
 
                     } else if (player.id !== socketId.val()) {
                         $("."+elem.id).append("<div for="+player.id+">"+player.name+"</div>");
                     }
                     else {
-                        $("."+elem.id).append("<div for="+player.id+">"+player.name+"<button id="+player.id+" onClick='leave(this)'>Leave</button><button onClick='disable(this)'>Ready</button></div>");
+                        $("."+elem.id).append("<div for="+player.id+">"+player.name+"<button id="+player.id+" onClick='leave(this)'>Leave</button><button id="+'red-'+player.id+" onClick='disable(this)'>Ready</button></div>");
 
                     }
                 });
@@ -112,7 +112,7 @@
             }
             else {
                 $('#'+id).prop('disabled', true);
-                $("."+id).append("<div for="+player.id+">"+player.name+"<button id="+player.id+" onClick='leave(this)'>Leave</button><button onClick='disable(this)'>Ready</button></div>");
+                $("."+id).append("<div for="+player.id+">"+player.name+"<button id="+player.id+" onClick='leave(this)'>Leave</button><button id="+'red-'+player.id+" onClick='disable(this)'>Ready</button></div>");
 
             }
         });
@@ -124,6 +124,18 @@
             $('#'+gameId).after('<span>Game Started</span>');
 
             $('.'+gameId).find('button').prop('disabled',true);
+        });
+
+
+        socket.on("player ready", function(msg) {
+            console.log("player ready.....", msg);
+            let creatorId = msg.creatorId,
+                    playerId = msg.playerId;
+
+            alert("reday");
+
+            $('#'+creatorId).prop('disabled', false);
+            $('#red-'+playerId).prop('disabled', true);
         });
 
         $("#reg").click(function(){
@@ -157,8 +169,6 @@
         });
     });
 
-
-    var count =0;
     function join(id) {
         let msg = {
             "playerId": socketId.val(),
@@ -168,11 +178,19 @@
         console.log("socket--", socket);
 
         socket.emit("joinGame", msg);
-        alert("join" + msg.gameId);
-        count = count+1;
     }
 
     function disable(e) {
+        var player = e.id.slice(4);
+        var gameId = $(e).parent().parent().attr('class');
+
+        let msg = {
+            "gameId": gameId,
+            "playerId": player
+        };
+
+        alert("gameid--" + gameId + "playerid --> " + player);
+        socket.emit("ready", msg);
         $(e).prop('disabled', true);
     }
 
@@ -206,14 +224,6 @@
         };
 
         socket.emit("playGame", msg);
-    }
-
-    function playGame(e) {
-        alert("playGame");
-        var gameId = $(e).parent().parent().attr('class');
-        $('#'+gameId).after('<span>Game Started</span>');
-
-        $('.'+gameId).find('button').prop('disabled',true);
     }
 
     function exit(e) {

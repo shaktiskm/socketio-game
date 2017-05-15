@@ -41,6 +41,8 @@ io.on("connection", sock => {
   
   socket.on("playGame", playGame);
 
+  socket.on("ready", playerReady);
+
   socket.on("exitGame", exitGame);
 
   socket.on("disconnect", () => {
@@ -164,6 +166,51 @@ function playGame(msg) {
 
   socket.emit("game in progress", message);
   socket.broadcast.emit("game in progress", message);
+}
+
+function playerReady(msg) {
+
+  console.log("playerReady ---> ", msg);
+
+  let {playerId, gameId} = msg,
+    gameManager = getGameManagerIns(),
+    game;
+
+  game = gameManager.getAllGame().filter(game => game.id === gameId);
+
+  console.log("game ---> ", game);
+
+  game[0].players.forEach(p => {
+    if (p.id === playerId) {
+      p.isReady = true;
+    }
+  });
+
+  gameManager.setGame(game[0]);
+
+  let playerReadyCount = game[0].players.filter(p => p.isReady).length;
+  console.log("red game count ---> ", game[0]);
+  console.log("red count ---> ", playerReadyCount);
+
+  let message = {
+    "creatorId": game[0].creator,
+    "playerId": playerId
+  };
+
+  if (playerReadyCount >= 2) {
+    console.log("in game count ---> ", message);
+    if (playerReadyCount >= 4) {
+      let gameAutoStart = {
+        "gameId": gameId
+      };
+
+      socket.emit("game in progress", gameAutoStart);
+      socket.broadcast.emit("game in progress", gameAutoStart);
+    } else {
+      socket.emit("player ready", message);
+      socket.broadcast.emit("player ready", message);
+    }
+  }
 }
 
 // Checks the required environment variables

@@ -22,6 +22,14 @@ class GameManager {
 		this.games = games;
 	}
 
+	setGame(game) {
+		this.games = this.games.map(g => {
+			if (g.id === game.id) {
+				g = game;
+			}
+			return g;
+		});
+	}
 }
 
 function getGameManagerIns() {
