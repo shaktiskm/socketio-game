@@ -1,9 +1,19 @@
+const Game = require("./Game");
+
 let protectedInstance;
 
 class GameManager {
 
-	constructor() {
+	constructor(uniqueIdService) {
 		this.games = [];
+		this.uniqueIdService = uniqueIdService;
+	}
+
+	createNewGame(name, creatorId) {
+		let uniqueGameId = this.uniqueIdService.createUniqueId(),
+			newGame = new Game(uniqueGameId, name, creatorId);
+
+		return newGame;
 	}
 
 	addGame(game) {
@@ -16,6 +26,17 @@ class GameManager {
 
 	getAllGame() {
 		return this.games;
+	}
+
+	getNotInProgressGames() {
+		return this.games.filter(game => !game.inProgress);
+	}
+
+	leaveGame(gameId, playerId) {
+		let filteredGame = this.games.filter(game => game.id === gameId);
+
+		filteredGame.players = filteredGame.players.filter(player => player.id !== playerId);
+		return filteredGame;
 	}
 
 	setAllGame(games) {
@@ -32,8 +53,8 @@ class GameManager {
 	}
 }
 
-function getGameManagerIns() {
-	protectedInstance = protectedInstance || new GameManager();
+function getGameManagerIns(uniqueIdService) {
+	protectedInstance = protectedInstance || new GameManager(uniqueIdService);
 	return protectedInstance;
 }
 

@@ -1,15 +1,19 @@
 const socketio = require("socket.io"),
   uuid = require("uuid"),
-  UniqueIdService = require("./util/UniqueIdService"),
+  getUniqueIdServiceInstance = require("./util/UniqueIdService"),
   Game = require("./Game"),
   Player = require("./Player"),
   getGameManagerIns = require("./GameManager"),
+  getPlayerManagerIns = require("./PlayerManager"),
   EventRelay = require("./EventRelay");
 
 let io,
   playerMap = new Map(),
   socket,
-  eventRelay = new EventRelay(playerMap);
+  uniqueIdService = getUniqueIdServiceInstance(uuid),
+  playerManager = getPlayerManagerIns(),
+  gameManager = getGameManagerIns(uniqueIdService),
+  eventRelay = new EventRelay(playerManager, gameManager);
 
 function initSocket(server) {
   io = socketio.listen(server);
@@ -27,11 +31,11 @@ function initSocket(server) {
 
     socket.on("register", eventRelay.register.bind(eventRelay, io));
 
-    socket.on("leaveGame", leave);
+    socket.on("leaveGame", eventRelay.leave.bind(eventRelay, socket));
 
     socket.on("joinGame", join);
 
-    socket.on("createGame", createGame);
+    socket.on("createGame", eventRelay.createGame.bind(eventRelay, socket));
 
     socket.on("playGame", playGame);
 
@@ -42,48 +46,6 @@ function initSocket(server) {
     socket.on("disconnect", () => {
       console.log("User Disconnected ... ");
     });
-  });
-}
-
-function createGame(msg) {
-  console.log("server createGame --->", msg);
-  let {name, creatorId} = msg,
-    newGame = new Game(name, creatorId),
-    gameManager = getGameManagerIns(),
-    availableGames,
-    uniqueIdServ,
-    player;
-
-  uniqueIdServ = new UniqueIdService(uuid);
-  newGame.id = uniqueIdServ.createUniqueId();
-  player = playerMap.get(creatorId);
-  console.log("new play--------", player);
-  let clonnedPlayer = Object.assign(player);
-  clonnedPlayer.isReady = false;
-  newGame.players.push(clonnedPlayer);
-
-  gameManager.addGame(newGame);
-  availableGames = gameManager.getAllGame();
-  console.log("available games..", Array.of(newGame));
-  socket.emit("games available", Array.of(newGame));
-  socket.broadcast.emit("games available", Array.of(newGame));
-}
-
-function leave(msg) {
-  console.log("server leaveGame---> ", msg);
-
-  let {gameId, playerId} = msg,
-    gameManager = getGameManagerIns(),
-    availableGames;
-
-  availableGames = gameManager.getAllGame();
-
-  availableGames.forEach(game => {
-    if (game.id === gameId) {
-      game.players = game.players.filter(p => p.id !== playerId);
-      socket.emit("players available", game);
-      socket.broadcast.emit("players available", game);
-    }
   });
 }
 
