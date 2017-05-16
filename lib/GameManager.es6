@@ -47,9 +47,13 @@ class GameManager {
 		}
 	}
 
-	// setAllGame(games) {
-	// 	this.games = games;
-	// }
+	makeGameInProgress(gameId) {
+		this.games.forEach(game => {
+			if (game.id === gameId) {
+				game.inProgress = true;
+			}
+		});
+	}
 
 	setGame(game) {
 		this.games = this.games.map(g => {

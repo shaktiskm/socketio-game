@@ -37,7 +37,7 @@ function initSocket(server) {
 
     socket.on("createGame", eventRelay.createGame.bind(eventRelay, socket));
 
-    socket.on("playGame", playGame);
+    socket.on("playGame", eventRelay.playGame.bind(eventRelay, socket));
 
     socket.on("ready", playerReady);
 
@@ -47,26 +47,6 @@ function initSocket(server) {
       console.log("User Disconnected ... ");
     });
   });
-}
-
-function playGame(msg) {
-  let {gameId} = msg,
-    gameManager = getGameManagerIns(),
-    availableGames = gameManager.getAllGame();
-
-  availableGames = availableGames.map(game => {
-    if (game.id === gameId) {
-      game.inProgress = true;
-    }
-    return game;
-  });
-
-  let message = {
-    "gameId": gameId
-  };
-
-  socket.emit("game in progress", message);
-  socket.broadcast.emit("game in progress", message);
 }
 
 function playerReady(msg) {

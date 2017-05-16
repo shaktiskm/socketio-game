@@ -77,6 +77,15 @@ class EventRelay {
 		socket.emit("player joined", message);
 		socket.broadcast.emit("player joined", message);
 	}
+
+	playGame(socket, msg) {
+		let {gameId} = msg;
+
+		this.gameManager.makeGameInProgress(gameId);
+
+		socket.emit("game in progress", {"gameId": gameId});
+		socket.broadcast.emit("game in progress", {"gameId": gameId});
+	}
 }
 
 module.exports = EventRelay;
