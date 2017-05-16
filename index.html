@@ -5,23 +5,38 @@
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 <script>
-    let socket;
+    let socket,
+        events = {
+            "MSG": "msg",
+            "CLIENT": "client",
+            "PLAYERS_AVAILABLE": "players available",
+            "GAMES_AVAILABLE": "games available",
+            "GAMES_AFTER_EXIT": "games after exit",
+            "NEW_GAME_ADDED": "new game added",
+            "PLAYER_JOINED": "player joined",
+            "GAME_IN_PROGRESS": "game in progress",
+            "PLAYER_READY": "player ready",
+            "REGISTER": "register",
+            "CREATEGAME": "createGame",
+            "LEAVEGAME": "leaveGame",
+            "JOINGAME": "joinGame",
+            "PLAYGAME": "playGame",
+            "READY": "ready",
+            "EXITGAME": "exitGame"
+        };
 
     $(document).ready(function(){
 
         socket = io.connect(),
-          socketId = $("#hdnSocketId");
+            socketId = $("#hdnSocketId");
 
-        socket.on("msg", function(msg){
+        socket.on(events.MSG, function(msg){
             let serverMsg = msg.id;
-            socket.emit("client", {"id": serverMsg, "name": "shakti" + serverMsg});
-            // alert(serverMsg);
+            socket.emit(events.CLIENT, {"id": serverMsg});
             socketId.val(serverMsg);
-            // alert(socketId.val());
         });
 
-        socket.on("players available", function(msg) {
-            console.log("players all.....", msg);
+        socket.on(events.PLAYERS_AVAILABLE, function(msg) {
             let elem = msg;
 
             $('.' + elem.id).empty();
@@ -38,16 +53,11 @@
                     $("."+elem.id).append("<div for="+player.id+">"+player.name+"<button id="+player.id+" onClick='leave(this)'>Leave</button><button id="+'red-'+player.id+" onClick='disable(this)'>Ready</button></div>");
 
                 }
-                });
-
-            // alert(msg);
+            });
         });
 
-        socket.on("games available", function(msg) {
-            console.log("games all.....", msg);
-            alert("games all");
+        socket.on(events.GAMES_AVAILABLE, function(msg) {
             $(msg).each(function(index, elem){
-                // alert(elem.id);
                 $(".ol").append("<li>"+elem.name+" <button id="+elem.id+" onClick='join(this.id)'>Join</button><span class="+elem.id+"></span></li>");
                 console.log("game creator----", elem.players);
                 elem.players.forEach(function (player) {
@@ -64,14 +74,12 @@
                     }
                 });
             });
-            // alert(msg);
         });
 
-        socket.on("games after exit", function(msg) {
+        socket.on(events.GAMES_AFTER_EXIT, function(msg) {
             console.log("games after exit.....", msg);
             $('.ol').empty();
             $(msg).each(function(index, elem){
-                // alert(elem.id);
                 $(".ol").append("<li>"+elem.name+" <button id="+elem.id+" onClick='join(this.id)'>Join</button><span class="+elem.id+"></span></li>");
                 elem.players.forEach(function (player) {
                     if(elem.creator === socketId.val() && player.id === socketId.val()) {
@@ -89,16 +97,14 @@
             });
         });
 
-        socket.on("new game added", function(msg) {
+        socket.on(events.NEW_GAME_ADDED, function(msg) {
             console.log("new games added.....", msg);
             $(msg).each(function(index, elem){
-                // alert(elem.id);
                 $(".ol").append("<li>"+elem.name+" <button id="+elem.id+" onClick='join(this.id)'>Join</button><span class="+elem.id+"><span></li>");
             });
-            // alert(msg);
         });
 
-        socket.on("player joined", function(msg) {
+        socket.on(events.PLAYER_JOINED, function(msg) {
             let id = msg.gameId,
                 player = msg.player,
                     creatorId = msg.creatorId;
@@ -117,7 +123,7 @@
             }
         });
 
-        socket.on("game in progress", function(msg) {
+        socket.on(events.GAME_IN_PROGRESS, function(msg) {
             console.log("game in progress.....", msg);
             let gameId = msg.gameId;
 
@@ -127,13 +133,11 @@
         });
 
 
-        socket.on("player ready", function(msg) {
+        socket.on(events.PLAYER_READY, function(msg) {
             console.log("player ready.....", msg);
             let creatorId = msg.creatorId,
                 gameId = msg.gameId,
                 playerId = msg.playerId;
-
-            alert("reday");
 
             $('.' + gameId).find(id = '#'+creatorId).prop('disabled', false);
             $('#red-'+playerId).prop('disabled', true);
@@ -141,15 +145,12 @@
 
         $("#reg").click(function(){
             var name =  $("#name").val();
-            alert(name);
             let msg = {
                 "name": name,
                 "id": socketId.val()
             };
 
-            alert(socketId.val());
-
-            socket.emit("register", msg);
+            socket.emit(events.REGISTER, msg);
             $(".register").hide();
             $(".game").show();
         });
@@ -165,7 +166,7 @@
                 "creatorId": socketId.val()
             };
 
-            socket.emit("createGame", msg);
+            socket.emit(events.CREATEGAME, msg);
             $(".gameinfo").hide();
         });
     });
@@ -176,9 +177,7 @@
             "gameId": id
         };
 
-        console.log("socket--", socket);
-
-        socket.emit("joinGame", msg);
+        socket.emit(events.JOINGAME, msg);
     }
 
     function disable(e) {
@@ -190,16 +189,11 @@
             "playerId": player
         };
 
-        alert("gameid--" + gameId + "playerid --> " + player);
-        socket.emit("ready", msg);
+        socket.emit(events.READY, msg);
         $(e).prop('disabled', true);
     }
 
     function leave(e) {
-
-        alert(e.id);
-        alert($(e).parent().parent().attr('class'));
-
         var player = e.id;
         var gameId = $(e).parent().parent().attr('class');
         $("div[for="+player+"]").remove();
@@ -209,36 +203,32 @@
             "playerId": player
         };
 
-        socket.emit("leaveGame", msg);
+        socket.emit(events.LEAVEGAME, msg);
 
         if(player == socketId.val()){
             $('#'+gameId).removeAttr('disabled');
         }
-
     }
 
     function play(e) {
-        alert("play");
         var gameId = $(e).parent().parent().attr('class');
         let msg = {
             "gameId": gameId
         };
 
-        socket.emit("playGame", msg);
+        socket.emit(events.PLAYGAME, msg);
     }
 
     function gameOver(gameId) {
-        alert("Game Over");
 
         let msg = {
             "gameId": gameId
         };
 
-        socket.emit('exitGame', msg);
+        socket.emit(events.EXITGAME, msg);
     }
 
     function exit(e) {
-        alert("exit");
         var player = e.id;
         var gameId = $(e).parent().parent().attr('class');
 
@@ -246,7 +236,7 @@
             "gameId": gameId
         };
 
-        socket.emit('exitGame', msg);
+        socket.emit(events.EXITGAME, msg);
     }
 
 </script>

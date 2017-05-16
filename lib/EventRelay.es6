@@ -1,8 +1,9 @@
 class EventRelay {
 
-	constructor(playerManager, gameManager) {
+	constructor(playerManager, gameManager, events) {
 		this.playerManager = playerManager;
 		this.gameManager = gameManager;
+		this.events = events;
 	}
 
 	register(io, msg) {
@@ -13,7 +14,7 @@ class EventRelay {
 		this.playerManager.createPlayer(id, name);
 		availableGames = this.gameManager.getNotInProgressGames();
 		console.log("available games in register ..", availableGames);
-		io.to(id).emit("games available", availableGames);
+		io.to(id).emit(this.events.GAMES_AVAILABLE, availableGames);
 	}
 
 	leave(socket, msg) {
@@ -22,8 +23,8 @@ class EventRelay {
 			game;
 
 		game = this.gameManager.leaveGame(gameId, playerId);
-		socket.emit("players available", game);
-		socket.broadcast.emit("players available", game);
+		socket.emit(this.events.PLAYERS_AVAILABLE, game);
+		socket.broadcast.emit(this.events.PLAYERS_AVAILABLE, game);
 	}
 
 	createGame(socket, msg) {
@@ -38,8 +39,8 @@ class EventRelay {
 		this.gameManager.addGame(newGame);
 
 		console.log("available games..", Array.of(newGame));
-		socket.emit("games available", Array.of(newGame));
-		socket.broadcast.emit("games available", Array.of(newGame));
+		socket.emit(this.events.GAMES_AVAILABLE, Array.of(newGame));
+		socket.broadcast.emit(this.events.GAMES_AVAILABLE, Array.of(newGame));
 	}
 
 	exitGame(socket, msg) {
@@ -50,8 +51,8 @@ class EventRelay {
 
 		games = this.gameManager.removeAndGetGames(gameId);
 		console.log("game after exit", games);
-		socket.emit("games after exit", games);
-		socket.broadcast.emit("games after exit", games);
+		socket.emit(this.events.GAMES_AFTER_EXIT, games);
+		socket.broadcast.emit(this.events.GAMES_AFTER_EXIT, games);
 	}
 
 	join(socket, msg) {
@@ -75,8 +76,8 @@ class EventRelay {
 
 		console.log("game msg", message);
 
-		socket.emit("player joined", message);
-		socket.broadcast.emit("player joined", message);
+		socket.emit(this.events.PLAYER_JOINED, message);
+		socket.broadcast.emit(this.events.PLAYER_JOINED, message);
 	}
 
 	playGame(socket, msg) {
@@ -84,8 +85,8 @@ class EventRelay {
 
 		this.gameManager.makeGameInProgress(gameId);
 
-		socket.emit("game in progress", {"gameId": gameId});
-		socket.broadcast.emit("game in progress", {"gameId": gameId});
+		socket.emit(this.events.GAME_IN_PROGRESS, {"gameId": gameId});
+		socket.broadcast.emit(this.events.GAME_IN_PROGRESS, {"gameId": gameId});
 	}
 
 	playerReady(socket, msg) {
@@ -114,11 +115,11 @@ class EventRelay {
 			console.log("in game count ---> ", message);
 
 			if (playerReadyCount >= 4) {
-				socket.emit("game in progress", {"gameId": gameId});
-				socket.broadcast.emit("game in progress", {"gameId": gameId});
+				socket.emit(this.events.GAME_IN_PROGRESS, {"gameId": gameId});
+				socket.broadcast.emit(this.events.GAME_IN_PROGRESS, {"gameId": gameId});
 			} else {
-				socket.emit("player ready", message);
-				socket.broadcast.emit("player ready", message);
+				socket.emit(this.events.PLAYER_READY, message);
+				socket.broadcast.emit(this.events.PLAYER_READY, message);
 			}
 		}
 	}
