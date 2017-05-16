@@ -18,7 +18,6 @@ class Game {
 	sendMsg(msg) {
 
 	}
-
 }
 
 module.exports = Game;
