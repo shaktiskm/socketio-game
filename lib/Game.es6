@@ -13,12 +13,9 @@ class Game {
 	}
 
 	leave(player) {
-		this.players = this.players.filter(p => p.id !== player.id);
+		this.players = this.players.filter(playerIns => playerIns.id !== player.id);
 	}
 
-	sendMsg(msg) {
-
-	}
 }
 
 module.exports = Game;

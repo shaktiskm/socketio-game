@@ -21,7 +21,7 @@ class EventRelay {
 		let {gameId, playerId} = msg,
 			game;
 
-		game  = this.gameManager.leaveGame(gameId, playerId);
+		game = this.gameManager.leaveGame(gameId, playerId);
 		socket.emit("players available", game);
 		socket.broadcast.emit("players available", game);
 	}
@@ -58,7 +58,8 @@ class EventRelay {
 		console.log("server join---> ", msg);
 		let {playerId, gameId} = msg,
 			player,
-			game;
+			game,
+			message;
 
 		player = this.playerManager.getPlayer(playerId);
 		game = this.gameManager.getGameById(gameId);
@@ -66,7 +67,7 @@ class EventRelay {
 
 		console.log("game------", game);
 
-		let message = {
+		message = {
 			"player": player,
 			"gameId": game[0].id,
 			"creatorId": game[0].creator
@@ -85,6 +86,41 @@ class EventRelay {
 
 		socket.emit("game in progress", {"gameId": gameId});
 		socket.broadcast.emit("game in progress", {"gameId": gameId});
+	}
+
+	playerReady(socket, msg) {
+
+		console.log("playerReady ---> ", msg);
+
+		let {playerId, gameId} = msg,
+			game,
+			playerReadyCount,
+			message;
+
+		this.gameManager.makePlayerReadyForGame(gameId, playerId);
+		game = this.gameManager.getGameById(gameId);
+		playerReadyCount = this.gameManager.getReadyPlayerCountForGame(game[0]);
+
+		console.log("ready game ---> ", game[0]);
+		console.log("ready count ---> ", playerReadyCount);
+
+		message = {
+			"creatorId": game[0].creator,
+			"gameId": gameId,
+			"playerId": playerId
+		};
+
+		if (playerReadyCount >= 2) {
+			console.log("in game count ---> ", message);
+
+			if (playerReadyCount >= 4) {
+				socket.emit("game in progress", {"gameId": gameId});
+				socket.broadcast.emit("game in progress", {"gameId": gameId});
+			} else {
+				socket.emit("player ready", message);
+				socket.broadcast.emit("player ready", message);
+			}
+		}
 	}
 }
 

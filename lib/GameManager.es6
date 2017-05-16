@@ -55,13 +55,22 @@ class GameManager {
 		});
 	}
 
-	setGame(game) {
-		this.games = this.games.map(g => {
-			if (g.id === game.id) {
-				g = game;
+	makePlayerReadyForGame(gameId, playerId) {
+		this.games.forEach(game => {
+
+			if (game.id === gameId) {
+				game.players = game.players.map(player => {
+					if (player.id === playerId) {
+						player.isReady = true;
+					}
+					return player;
+				});
 			}
-			return g;
 		});
+	}
+
+	getReadyPlayerCountForGame(game) {
+		return game.players.filter(player => player.isReady).length;
 	}
 }
 
