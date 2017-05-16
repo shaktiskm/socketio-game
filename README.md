@@ -64,3 +64,7 @@ https://mysterious-dusk-71044.herokuapp.com/
 *   **Play Game** is visible to creator only. it will be enabled after 2 ready signal. Click on the button to play the game. Game playing is nothing so it will just disable everything.
 *   Game will be automatically started when we have 4 ready signal for a game.
 *   **Game Over** is used to finish & delist the game
+
+## Scalable Solution
+https://github.com/shaktiskm/docs/blob/master/socketio-game.docx
+
