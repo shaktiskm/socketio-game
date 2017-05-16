@@ -40,3 +40,15 @@
     ```
     grunt eslint
     ```
+    
+## Testing the SocketIO Game
+* To test the App, Healthcheck endpoint
+```
+http://localhost:8050/v1/healthcheck
+https://mysterious-dusk-71044.herokuapp.com/v1/healthcheck
+```
+* To start the app,
+```
+http://localhost:8050
+https://mysterious-dusk-71044.herokuapp.com/
+```
