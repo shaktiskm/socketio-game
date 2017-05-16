@@ -33,7 +33,7 @@ function initSocket(server) {
 
     socket.on("leaveGame", eventRelay.leave.bind(eventRelay, socket));
 
-    socket.on("joinGame", join);
+    socket.on("joinGame", eventRelay.join.bind(eventRelay, socket));
 
     socket.on("createGame", eventRelay.createGame.bind(eventRelay, socket));
 
@@ -41,60 +41,12 @@ function initSocket(server) {
 
     socket.on("ready", playerReady);
 
-    socket.on("exitGame", exitGame);
+    socket.on("exitGame", eventRelay.exitGame.bind(eventRelay, socket));
 
     socket.on("disconnect", () => {
       console.log("User Disconnected ... ");
     });
   });
-}
-
-function exitGame(msg) {
-  console.log("server exitGame---> ", msg);
-
-  let {gameId} = msg,
-    gameManager = getGameManagerIns(),
-    availableGames;
-
-  availableGames = gameManager.getAllGame();
-
-  let games = availableGames.filter(game => game.id !== gameId);
-
-  gameManager.setAllGame(games);
-
-  console.log("game after exit", games);
-
-  socket.emit("games after exit", games);
-  socket.broadcast.emit("games after exit", games);
-}
-
-function join(msg) {
-  console.log("server join---> ", msg);
-  let {playerId, gameId} = msg,
-    gameManager = getGameManagerIns(),
-    availableGames = gameManager.getAllGame(),
-    player,
-    clonnedPlayer,
-    game;
-
-  player = playerMap.get(playerId),
-    game = availableGames.filter(game => game.id === gameId);
-  clonnedPlayer = Object.assign(player);
-  clonnedPlayer.isReady = false;
-  game[0].join(clonnedPlayer);
-
-  console.log("game------", game);
-
-  let message = {
-    "player": player,
-    "gameId": game[0].id,
-    "creatorId": game[0].creator
-  };
-
-  console.log("game msg", message);
-
-  socket.emit("player joined", message);
-  socket.broadcast.emit("player joined", message);
 }
 
 function playGame(msg) {

@@ -20,8 +20,13 @@ class GameManager {
 		this.games.push(game);
 	}
 
+	removeAndGetGames(gameId) {
+		this.games = this.games.filter(game => game.id !== gameId);
+		return this.games;
+	}
+
 	getGameById(gameId) {
-		return this.games.filter(id => id === gameId);
+		return this.games.filter(game => game.id === gameId);
 	}
 
 	getAllGame() {
@@ -33,15 +38,18 @@ class GameManager {
 	}
 
 	leaveGame(gameId, playerId) {
-		let filteredGame = this.games.filter(game => game.id === gameId);
 
-		filteredGame.players = filteredGame.players.filter(player => player.id !== playerId);
-		return filteredGame;
+		for (let game of this.games) {
+			if (game.id === gameId) {
+				game.players = game.players.filter(player => player.id !== playerId);
+				return game;
+			}
+		}
 	}
 
-	setAllGame(games) {
-		this.games = games;
-	}
+	// setAllGame(games) {
+	// 	this.games = games;
+	// }
 
 	setGame(game) {
 		this.games = this.games.map(g => {

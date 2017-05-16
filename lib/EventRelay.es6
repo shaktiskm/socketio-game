@@ -41,6 +41,42 @@ class EventRelay {
 		socket.emit("games available", Array.of(newGame));
 		socket.broadcast.emit("games available", Array.of(newGame));
 	}
+
+	exitGame(socket, msg) {
+		console.log("server exitGame---> ", msg);
+
+		let {gameId} = msg,
+			games;
+
+		games = this.gameManager.removeAndGetGames(gameId);
+		console.log("game after exit", games);
+		socket.emit("games after exit", games);
+		socket.broadcast.emit("games after exit", games);
+	}
+
+	join(socket, msg) {
+		console.log("server join---> ", msg);
+		let {playerId, gameId} = msg,
+			player,
+			game;
+
+		player = this.playerManager.getPlayer(playerId);
+		game = this.gameManager.getGameById(gameId);
+		game[0].join(player);
+
+		console.log("game------", game);
+
+		let message = {
+			"player": player,
+			"gameId": game[0].id,
+			"creatorId": game[0].creator
+		};
+
+		console.log("game msg", message);
+
+		socket.emit("player joined", message);
+		socket.broadcast.emit("player joined", message);
+	}
 }
 
 module.exports = EventRelay;
