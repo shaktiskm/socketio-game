@@ -3,11 +3,13 @@ const socketio = require("socket.io"),
   UniqueIdService = require("./util/UniqueIdService"),
   Game = require("./Game"),
   Player = require("./Player"),
-  getGameManagerIns = require("./GameManager");
+  getGameManagerIns = require("./GameManager"),
+  EventRelay = require("./EventRelay");
 
 let io,
   playerMap = new Map(),
-  socket;
+  socket,
+  eventRelay = new EventRelay(playerMap);
 
 function initSocket(server) {
   io = socketio.listen(server);
@@ -23,7 +25,7 @@ function initSocket(server) {
       console.log("server ack client---> ", msg);
     });
 
-    socket.on("register", register);
+    socket.on("register", eventRelay.register.bind(eventRelay, io));
 
     socket.on("leaveGame", leave);
 
@@ -41,22 +43,6 @@ function initSocket(server) {
       console.log("User Disconnected ... ");
     });
   });
-}
-
-function register(msg) {
-  console.log("server register---> ", msg);
-  let {id, name} = msg,
-    newPlayer = new Player(id, name);
-
-  playerMap.set(id, newPlayer);
-
-  let gameManager = getGameManagerIns(),
-    availableGames;
-
-  availableGames = gameManager.getAllGame().filter(game => !game.inProgress);
-  console.log("playerMap ..", playerMap);
-  console.log("available games in register ..", availableGames);
-  io.to(id).emit("games available", availableGames);
 }
 
 function createGame(msg) {
@@ -82,7 +68,6 @@ function createGame(msg) {
   socket.emit("games available", Array.of(newGame));
   socket.broadcast.emit("games available", Array.of(newGame));
 }
-
 
 function leave(msg) {
   console.log("server leaveGame---> ", msg);
